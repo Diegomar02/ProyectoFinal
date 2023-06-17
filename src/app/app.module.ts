@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { Airbnb1Component } from './airbnb1/airbnb1.component';
@@ -31,6 +30,8 @@ import { DomseguroPipe } from './airbnb/domseguro.pipe';
 import { FullCalendarModule } from '@fullcalendar/angular';
 
 
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -53,7 +54,10 @@ import { FullCalendarModule } from '@fullcalendar/angular';
     BuscarDisponibilidadComponent,
     AirbnbComponent,
     VideoComponent,
-    DomseguroPipe
+    DomseguroPipe,
+  
+  
+
 
 
   ],
@@ -65,6 +69,7 @@ import { FullCalendarModule } from '@fullcalendar/angular';
     MatCardModule,
     MatIconModule,
     FullCalendarModule,
+    
 
   ],
   providers: [PaisesService],
