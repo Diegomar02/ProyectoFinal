@@ -15,6 +15,7 @@ import { AyudaComponent } from './ayuda/ayuda.component';
 import { ContactoComponent } from './contacto/contacto.component';
 import { BuscarDisponibilidadComponent } from './buscar-disponibilidad/buscar-disponibilidad.component';
 import { AirbnbComponent } from './airbnb/airbnb.component';
+import { HacerReservacionComponent } from './hacer-reservacion/hacer-reservacion.component';
 
 const routes: Routes = [
   { path:"airbnb1",component:Airbnb1Component},
@@ -32,6 +33,7 @@ const routes: Routes = [
   { path:"contacto",component:ContactoComponent},
   { path:"buscarDisponibilidad",component:BuscarDisponibilidadComponent},
   { path:"airbnb",component:AirbnbComponent},
+  {path:"hacerReservacion",component:HacerReservacionComponent}
 
 
 

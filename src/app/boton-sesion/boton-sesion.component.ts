@@ -1,4 +1,5 @@
 import { Component, ElementRef, ViewChild } from "@angular/core";
+import { UserService } from "../services/user.service";
 
 @Component({
   selector: 'app-boton-sesion',
@@ -28,11 +29,12 @@ export class BotonSesionComponent {
   contrasena: string = "";
   nacimiento: Date = new Date;
 
-  constructor() {
+  constructor(private userService: UserService) {
     if (localStorage.getItem("usuarios") != null) {
       this.usuarios = JSON.parse(localStorage.getItem("usuarios") || "");
     }
     this.verificarSesion();
+    console.log(userService.mostrarAuth());
   }
 
   verificarSesion(): void {
@@ -54,38 +56,24 @@ export class BotonSesionComponent {
       contrasena: this.contrasena,
       nacimiento: this.nacimiento,
     }
-    if (this.validarRegistro(aux)) {
-      this.exito = true;
-      this.msj = "Has sido registrado!"
-      this.usuarioActual = aux;
-      localStorage.setItem("usuarioActual", JSON.stringify(this.usuarioActual));
-      this.usuarios.push(aux);
-      localStorage.removeItem("usuarios");
-      localStorage.setItem("usuarios", JSON.stringify(this.usuarios));
-      this.sesionIniciada = true;
-      this.txtBoton = "Hola " + this.usuarioActual.nombre + "!";
-    }
-  }
-
-  validarRegistro(usuario: Usuario): boolean {
-    for (let i of this.usuarios) {
-      if (i.correo == usuario.correo && i.telefono == usuario.telefono) {
+    this.userService.registrarUsuario(aux, false);
+    setTimeout(() => {
+      if (localStorage.getItem("usuarioActual") != null) {
+        console.log("logrado");
+        this.usuarioActual = aux;
+        this.msj = "Has sido registrado!";
+        this.txtBoton = "Hola " + this.usuarioActual.nombre + "!";
+        this.exito = true;
+        this.sesionIniciada = true;
+        this.error = false;
+        this.continuar = true;
+      } else {
+        console.log("errado");
         this.error = true;
-        this.msj = "Correo y telefono ya siendo usados por un usuario.";
-        return false;
-      } else if (i.correo == usuario.correo) {
-        this.error = true;
-        this.msj = "Esta cuenta de correo ya esta siendo usada por un usuario.";
-        return false;
-      } else if (i.telefono == usuario.telefono) {
-        this.error = true;
-        this.msj = "Este numero de telefono ya esta siendo usado por un usuario.";
-        return false;
+        this.msj = "Error, verifique haber escrito correctamente su informacion.";
       }
-    }
-    this.error = false;
-    this.continuar = true;
-    return true
+    }, 5000);
+
   }
 
   limpiar(): void {
@@ -102,50 +90,41 @@ export class BotonSesionComponent {
     this.eliminar = false;
   }
 
-  refrescar():void{ window.location.reload();}
+  refrescar(): void { window.location.reload(); }
 
   iniciarSesion(): void {
-    var band = -1;
-    for (let i of this.usuarios) {
-      if (i.correo == this.correo) {
-        if (this.contrasena == i.contrasena) {
-          this.usuarioActual = i;
-          localStorage.setItem("usuarioActual", JSON.stringify(this.usuarioActual));
-          band = 1;
+    if (!this.userService.validarUsuario(this.correo)) {
+      this.userService.iniciarSesion(this.correo, this.contrasena, false);
+      setTimeout(() => {
+        if (localStorage.getItem("usuarioActual") != null) {
+          this.usuarioActual = JSON.parse(localStorage.getItem("usuarioActual") || "");
+          this.msj = "Has iniciado sesion!";
+          this.exito = true;
+          this.error = false
+          this.continuar = true;
+          this.sesionIniciada = true;
+          this.txtBoton = "Hola " + this.usuarioActual.nombre + "!";
         } else {
-          band = 0;
+          this.error = true;
+          this.exito = false
+          this.msj = "Contrasena incorrecta.";
         }
-        break;
-      }
-    }
-    if (band == 0) {
-      this.error = true;
-      this.exito = false
-      this.msj = "Contrasena incorrecta.";
-    } else if (band == 1) {
-      this.exito = true;
-      this.error = false
-      this.continuar = true;
-      this.sesionIniciada = true;
-      this.txtBoton = "Hola " + this.usuarioActual.nombre + "!";
-      this.msj = "Has iniciado sesion!";
-    } else if (band == -1) {
+      }, 3000)
+    } else {
       this.error = true;
       this.exito = false;
       this.msj = "Nombre de usario no encontrado, intenta de nuevo.";
-
     }
   }
 
   cerrarSesion(): void {
-    this.txtBoton = "Bienvenido!";
+    this.userService.cerrarSesion();
     this.usuarioActual.nombre = "";
     this.usuarioActual.apellido = "";
     this.usuarioActual.correo = "";
     this.usuarioActual.telefono = "";
     this.usuarioActual.contrasena = "";
     this.usuarioActual.nacimiento = new Date;
-    localStorage.removeItem("usuarioActual");
     this.sesionIniciada = false;
     this.limpiar();
     this.refrescar();
@@ -186,40 +165,31 @@ export class BotonSesionComponent {
         }
       }
       this.usuarios = aux2;
-      if (this.validarRegistro(aux)) {
-        localStorage.removeItem("usuarioActual");
+      if (this.userService.validarUsuario(aux.correo)) {
+        this.userService.borrarUsuario(this.usuarioActual);
         this.usuarioActual = aux;
-        localStorage.setItem("usuarioActual", JSON.stringify(this.usuarioActual));
-        this.usuarios.push(this.usuarioActual);
-        localStorage.removeItem("usuarios");
-        localStorage.setItem("usuarios", JSON.stringify(this.usuarios));
-        this.continuar = true;
+        this.userService.registrarUsuario(this.usuarioActual, false);
+        this.msj = "Registro actualizado!";
+        this.txtBoton = "Hola " + this.usuarioActual.nombre + "!";
         this.exito = true;
+        this.sesionIniciada = true;
         this.error = false;
-        this.msj = "Tu informacion ha sido modificada correctamente.";
-      }else{
-        this.usuarios.push(this.usuarioActual);
+        this.continuar = true;
+      } else {
+        this.error = true;
+        this.msj = "Error, verifique haber escrito correctamente su informacion.";
       }
     }
   }
 
-  eliminarUsuario():void{
-    if(this.contrasena == this.usuarioActual.contrasena){
-      let aux:Usuario[] = [];
-      for(let i of this.usuarios){
-        if(i.correo != this.usuarioActual.correo){
-          aux.push(i);
-        }
-      }
-      this.usuarios = aux;
-      localStorage.removeItem("usuarios");
-      localStorage.setItem("usuarios",JSON.stringify(this.usuarios));
-      localStorage.removeItem("usuarioActual");
+  eliminarUsuario(): void {
+    if (this.contrasena == this.usuarioActual.contrasena) {
+      this.userService.borrarUsuario(this.usuarioActual);
       this.exito = true;
       this.error = false;
       this.msj = "Tu cuenta ha sido eliminada correctamente!";
       this.continuar = true;
-    }else{
+    } else {
       this.error = true;
       this.msj = "Contrasena incorrecta.";
     }
@@ -235,4 +205,5 @@ interface Usuario {
   contrasena: string,
   nacimiento: Date,
 }
+
 

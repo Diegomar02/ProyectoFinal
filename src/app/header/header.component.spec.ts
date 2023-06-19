@@ -11,10 +11,12 @@ describe('HeaderComponent', () => {
       declarations: [ HeaderComponent ]
     })
     .compileComponents();
+
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });

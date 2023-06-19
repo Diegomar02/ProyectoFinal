@@ -1,6 +1,7 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -28,9 +29,13 @@ import { AirbnbComponent } from './airbnb/airbnb.component';
 import { VideoComponent } from './video/video.component';
 import { DomseguroPipe } from './airbnb/domseguro.pipe';
 import { FullCalendarModule } from '@fullcalendar/angular';
-
-
-
+import { initializeApp,provideFirebaseApp } from '@angular/fire/app';
+import { environment } from '../environments/environment';
+import { provideAuth,getAuth } from '@angular/fire/auth';
+import { provideFirestore,getFirestore } from '@angular/fire/firestore';
+import { HacerReservacionComponent } from './hacer-reservacion/hacer-reservacion.component';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { MyChartComponent } from './my-chart/my-chart.component';
 
 @NgModule({
   declarations: [
@@ -55,10 +60,8 @@ import { FullCalendarModule } from '@fullcalendar/angular';
     AirbnbComponent,
     VideoComponent,
     DomseguroPipe,
-  
-  
-
-
+    HacerReservacionComponent,
+    MyChartComponent
 
   ],
   imports: [
@@ -69,7 +72,15 @@ import { FullCalendarModule } from '@fullcalendar/angular';
     MatCardModule,
     MatIconModule,
     FullCalendarModule,
-    
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideAuth(() => getAuth()),
+    provideFirestore(() => getFirestore()),
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
 
   ],
   providers: [PaisesService],

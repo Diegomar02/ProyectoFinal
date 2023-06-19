@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { Accessibility } from 'accessibility/dist/main';
 
+
 @Component({
   selector: 'app-root',
-  templateUrl:'./app.component.html',
+  templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'MiniProyecto6semestre';
+  title = 'MiniProyecto2';
 
   constructor(){
     var opt = new Accessibility({
